@@ -1,66 +1,45 @@
-import db from "@/db/drizzle";
-import { challenges } from "@/db/schema";
+import db from "@/db/drizzle"
+import { courses } from "@/db/schema"
 import { isAdmin } from "@/lib/admin";
-import { eq } from "drizzle-orm";
+import { eq } from "drizzle-orm"
 import { NextResponse } from "next/server";
 
-// GET a specific challenge for a specific course
-export const GET = async (
-  req: Request,
-  { params }: { params: { courseId: string; challengeId: string } }
-) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 403 });
-  }
+export const GET = async( req: Request, { params } : { params: { courseId: number } }) => {
 
-  const courseId = parseInt(params.courseId); // parse the courseId
-  const challengeId = parseInt(params.challengeId); // parse the challengeId
+    if(!isAdmin()) {
+        return new NextResponse("Unauthorized", { status: 403 })
+    }
 
-  const data = await db.query.challenges.findFirst({
-    where: eq(challenges.id, challengeId),
-  });
+    const data = await db.query.courses.findFirst({
+        where: eq(courses.id, params.courseId),
+    });
 
-  return NextResponse.json(data);
-};
+    return NextResponse.json(data)
+}
 
-// UPDATE a specific challenge for a specific course
-export const PUT = async (
-  req: Request,
-  { params }: { params: { courseId: string; challengeId: string } }
-) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 403 });
-  }
+export const PUT = async( req: Request, { params } : { params: { courseId: number } }) => {
 
-  const courseId = parseInt(params.courseId); // parse the courseId
-  const challengeId = parseInt(params.challengeId); // parse the challengeId
-  const body = await req.json();
+    if(!isAdmin()) {
+        return new NextResponse("Unauthorized", { status: 403 })
+    }
 
-  const data = await db
-    .update(challenges)
-    .set({ ...body })
-    .where(eq(challenges.id, challengeId))
-    .returning();
+    const body = await req.json();
 
-  return NextResponse.json(data[0]);
-};
+    const data = await db.update(courses).set({
+        ...body,
+    }).where(eq(courses.id, params.courseId)).returning();
 
-// DELETE a specific challenge for a specific course
-export const DELETE = async (
-  req: Request,
-  { params }: { params: { courseId: string; challengeId: string } }
-) => {
-  if (!isAdmin()) {
-    return new NextResponse("Unauthorized", { status: 403 });
-  }
+    return NextResponse.json(data[0])
+}
 
-  const courseId = parseInt(params.courseId); // parse the courseId
-  const challengeId = parseInt(params.challengeId); // parse the challengeId
 
-  const data = await db
-    .delete(challenges)
-    .where(eq(challenges.id, challengeId))
-    .returning();
+export const DELETE = async( req: Request, { params } : { params: { courseId: number } }) => {
 
-  return NextResponse.json(data[0]);
-};
+    if(!isAdmin()) {
+        return new NextResponse("Unauthorized", { status: 403 })
+    }
+
+    const data = await db.delete(courses).where(eq(courses.id,params.courseId)).returning();
+
+    return NextResponse.json(data[0])
+}
